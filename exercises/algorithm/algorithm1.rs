@@ -2,8 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
-
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
@@ -69,15 +67,67 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self
+    where
+        T: Ord,
+    {
+        fn take_front<T>(list: &mut LinkedList<T>) -> Option<T> {
+            let head_ptr = list.start?;
+
+            unsafe {
+                let mut boxed = Box::from_raw(head_ptr.as_ptr());
+                let next = boxed.next;
+                list.start = next;
+
+                if list.start.is_none() {
+                    list.end = None;
+                }
+
+                if list.length > 0 {
+                    list.length -= 1;
+                }
+
+                boxed.next = None;
+                let Node { val, .. } = Box::into_inner(boxed);
+                Some(val)
+            }
         }
-	}
+
+        let mut merged = LinkedList::new();
+        let mut cur_a = take_front(&mut list_a);
+        let mut cur_b = take_front(&mut list_b);
+
+        loop {
+            match (&cur_a, &cur_b) {
+                (Some(a_val), Some(b_val)) => {
+                    if a_val <= b_val {
+                        merged.add(cur_a.take().unwrap());
+                        cur_a = take_front(&mut list_a);
+                    } else {
+                        merged.add(cur_b.take().unwrap());
+                        cur_b = take_front(&mut list_b);
+                    }
+                }
+                (Some(_), None) => {
+                    merged.add(cur_a.take().unwrap());
+                    while let Some(value) = take_front(&mut list_a) {
+                        merged.add(value);
+                    }
+                    break;
+                }
+                (None, Some(_)) => {
+                    merged.add(cur_b.take().unwrap());
+                    while let Some(value) = take_front(&mut list_b) {
+                        merged.add(value);
+                    }
+                    break;
+                }
+                (None, None) => break,
+            }
+        }
+
+        merged
+    }
 }
 
 impl<T> Display for LinkedList<T>

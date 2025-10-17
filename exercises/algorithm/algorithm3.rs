@@ -3,10 +3,19 @@
 	This problem requires you to implement a sorting algorithm
 	you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
+fn sort<T>(arr: &mut [T])
+where
+    T: Ord,
+{
+    let len = arr.len();
 
-fn sort<T>(array: &mut [T]){
-	//TODO
+    for i in 1..len {
+        let mut j = i;
+        while j > 0 && arr[j] < arr[j - 1] {
+            arr.swap(j, j - 1);
+            j -= 1;
+        }
+    }
 }
 #[cfg(test)]
 mod tests {
@@ -31,3 +40,4 @@ mod tests {
         assert_eq!(vec, vec![11, 22, 33, 44, 55, 66, 77, 88, 99]);
     }
 }
+
